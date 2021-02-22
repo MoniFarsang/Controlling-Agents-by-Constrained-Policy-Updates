@@ -104,7 +104,9 @@ BipedalWalker-v3:
   n_epochs: 10
   ent_coef: 0.001
   learning_rate: !!float 2.5e-4
-  clip_range: 0.2
+  clip_range_function: 'const' #default
+  clip_range_initialvalue: 0.2 #default
+  clip_range_endvalue: 0.0
 
 BipedalWalkerHardcore-v3:
   normalize: true
@@ -141,6 +143,9 @@ LunarLanderContinuous-v2:
   gamma: 0.999
   n_epochs: 4
   ent_coef: 0.01
+  clip_range_function: 'const' #default
+  clip_range_initialvalue: 0.2 #default
+  clip_range_endvalue: 0.0
 
 # Tuned
 HalfCheetahBulletEnv-v0:
@@ -432,7 +437,9 @@ CarRacing-v0:
   vf_coef: 0.5
   learning_rate: !!float 3e-5
   use_sde: True
-  clip_range: 0.4
+  clip_range_function: 'const'
+  clip_range_initialvalue: 0.4
+  clip_range_endvalue: 0.0
   policy_kwargs: "dict(log_std_init=-2,
                        ortho_init=False,
                        )"
