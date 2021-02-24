@@ -327,7 +327,7 @@ def zcurve_schedule_clip(initial_value, end_value):
         :param progress: (float)
         :return: (float)
         """
-        return (end_value + (initial_value-end_value)/(1+np.exp(-10*(2*progress+1))))
+        return (end_value + (initial_value-end_value)/(1+np.exp(10*(-2*progress+1))))
 
     return func
 
