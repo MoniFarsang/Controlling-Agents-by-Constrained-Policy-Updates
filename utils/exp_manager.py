@@ -24,7 +24,7 @@ from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckA
 from stable_baselines3.common.preprocessing import is_image_space
 from stable_baselines3.common.sb2_compat.rmsprop_tf_like import RMSpropTFLike  # noqa: F401
 from stable_baselines3.common.utils import constant_fn
-from utils.utils import linear_schedule_clip, exponential_schedule_clip
+from utils.utils import linear_schedule_clip, exponential_schedule_clip, zcurve_schedule_clip
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnv, VecFrameStack, VecNormalize, VecTransposeImage
 from stable_baselines3.common.vec_env.obs_dict_wrapper import ObsDictWrapper
 
@@ -289,6 +289,9 @@ class ExperimentManager(object):
                 hyperparams["clip_range"]=linear_schedule_clip(float(hyperparams["clip_range_initialvalue"]),float(hyperparams["clip_range_endvalue"]))    
             elif hyperparams["clip_range_function"]=='exp':
                 hyperparams["clip_range"]=exponential_schedule_clip(float(hyperparams["clip_range_initialvalue"]),float(hyperparams["clip_range_endvalue"]))
+            elif hyperparams["clip_range_function"]=='zcurve':
+                hyperparams["clip_range"]=zcurve_schedule_clip(float(hyperparams["clip_range_initialvalue"]),float(hyperparams["clip_range_endvalue"]))
+            
             del hyperparams["clip_range_function"]
             del hyperparams["clip_range_initialvalue"]
             del hyperparams["clip_range_endvalue"]

@@ -8,7 +8,7 @@ import gym
 import stable_baselines3 as sb3  # noqa: F401
 import torch as th  # noqa: F401
 import yaml
-
+import numpy as np
 from utils.PPO_modified import PPO
 from utils.PPO_adaptive import PPO as PPO_lambda
 from stable_baselines3 import A2C, DDPG, DQN, HER, SAC, TD3
@@ -308,6 +308,26 @@ def linear_schedule_clip(initial_value, end_value):
         :return: (float)
         """
         return max(progress * initial_value, end_value)
+
+    return func
+
+def zcurve_schedule_clip(initial_value, end_value):
+    """
+    Linear cliprange schedule.
+    :param initial_value: (float)
+    :param end_value: (float)
+    :return: (function)
+    """
+    if isinstance(initial_value, str):
+        initial_value = float(initial_value)
+
+    def func(progress):
+        """
+        Progress will decrease from 1 (beginning) to 0
+        :param progress: (float)
+        :return: (float)
+        """
+        return (end_value + (initial_value-end_value)/(1+np.exp(-10*progress)))
 
     return func
 
