@@ -36,7 +36,7 @@ import utils.import_envs  # noqa: F401 pytype: disable=import-error
 from utils.callbacks import SaveVecNormalizeCallback, TrialEvalCallback
 from utils.hyperparams_opt import HYPERPARAMS_SAMPLER
 from utils.utils import ALGOS, get_callback_list, get_latest_run_id, get_wrapper_class, linear_schedule
-
+from utils.make_env import make_vec_env_custom
 
 class ExperimentManager(object):
     """
@@ -68,6 +68,7 @@ class ExperimentManager(object):
         sampler: str = "tpe",
         pruner: str = "median",
         schedule: str = "const",
+        moving_window: bool = False,
         n_startup_trials: int = 0,
         n_evaluations: int = 1,
         truncate_last_trajectory: bool = False,
@@ -175,6 +176,7 @@ class ExperimentManager(object):
                 tensorboard_log=self.tensorboard_log,
                 seed=self.seed,
                 verbose=self.verbose,
+                clip_range_moving_window=self.clip_range_moving_window,
                 **self._hyperparams,
             )
 
@@ -373,6 +375,13 @@ class ExperimentManager(object):
         if "callback" in hyperparams.keys():
             del hyperparams["callback"]
 
+        if "clip_range_moving_window" in hyperparams.keys():
+            self.clip_range_moving_window = hyperparams["clip_range_moving_window"]
+            del hyperparams["clip_range_moving_window"]
+        else:
+            self.clip_range_moving_window = False
+            
+
         return hyperparams, env_wrapper, callbacks
 
     def _preprocess_action_noise(self, hyperparams: Dict[str, Any], env: VecEnv) -> Dict[str, Any]:
@@ -529,7 +538,7 @@ class ExperimentManager(object):
 
         # env = SubprocVecEnv([make_env(env_id, i, self.seed) for i in range(n_envs)])
         # On most env, SubprocVecEnv does not help and is quite memory hungry
-        env = make_vec_env(
+        env = make_vec_env_custom(
             env_id=self.env_id,
             n_envs=n_envs,
             seed=self.seed,
