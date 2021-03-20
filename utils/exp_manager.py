@@ -68,7 +68,7 @@ class ExperimentManager(object):
         sampler: str = "tpe",
         pruner: str = "median",
         schedule: str = "const",
-        moving_window: bool = False,
+        clip_range_moving_window: bool = False,
         n_startup_trials: int = 0,
         n_evaluations: int = 1,
         truncate_last_trajectory: bool = False,
@@ -176,7 +176,7 @@ class ExperimentManager(object):
                 tensorboard_log=self.tensorboard_log,
                 seed=self.seed,
                 verbose=self.verbose,
-                clip_range_moving_window=self.clip_range_moving_window,
+                #clip_range_moving_window=self.clip_range_moving_window,
                 **self._hyperparams,
             )
 
