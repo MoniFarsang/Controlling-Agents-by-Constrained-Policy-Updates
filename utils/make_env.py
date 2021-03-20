@@ -48,7 +48,7 @@ def make_vec_env_custom(
             if isinstance(env_id, str):
                 env = gym.make(env_id, **env_kwargs)
                 if env_id == "CarRacing-v0":
-                    env._max_episode_steps=10000
+                    env._max_episode_steps=250
             else:
                 env = env_id(**env_kwargs)
             if seed is not None:
