@@ -29,6 +29,7 @@ Pendulum-v0:
   clip_range_function: 'const'
   clip_range_initialvalue: 0.2
   clip_range_endvalue: 0.0
+  clip_range_moving_window: False
 
 # Tuned
 CartPole-v1:
@@ -45,6 +46,7 @@ CartPole-v1:
   clip_range_function: 'lin'
   clip_range_initialvalue: 0.2
   clip_range_endvalue: 0.0
+  clip_range_moving_window: False
 
 MountainCar-v0:
   normalize: true
@@ -56,6 +58,7 @@ MountainCar-v0:
   gamma: 0.99
   n_epochs: 4
   ent_coef: 0.0
+  clip_range_moving_window: False
 
 # Tuned
 MountainCarContinuous-v0:
@@ -77,6 +80,7 @@ MountainCarContinuous-v0:
   vf_coef: 0.19
   use_sde: True
   policy_kwargs: "dict(log_std_init=-3.29, ortho_init=False)"
+  clip_range_moving_window: False
 
 Acrobot-v1:
   normalize: true
@@ -91,6 +95,7 @@ Acrobot-v1:
   clip_range_function: 'const' #default
   clip_range_initialvalue: 0.2 #default
   clip_range_endvalue: 0.0
+  clip_range_moving_window: False
 
 BipedalWalker-v3:
   normalize: true
@@ -107,6 +112,7 @@ BipedalWalker-v3:
   clip_range_function: 'const' #default
   clip_range_initialvalue: 0.2 #default
   clip_range_endvalue: 0.0
+  clip_range_moving_window: False
 
 BipedalWalkerHardcore-v3:
   normalize: true
@@ -121,6 +127,7 @@ BipedalWalkerHardcore-v3:
   ent_coef: 0.001
   learning_rate: lin_2.5e-4
   clip_range: lin_0.2
+  clip_range_moving_window: False
 
 LunarLander-v2:
   n_envs: 16
@@ -132,6 +139,7 @@ LunarLander-v2:
   gamma: 0.999
   n_epochs: 4
   ent_coef: 0.01
+  clip_range_moving_window: False
 
 LunarLanderContinuous-v2:
   n_envs: 16
@@ -146,6 +154,7 @@ LunarLanderContinuous-v2:
   clip_range_function: 'const' #default
   clip_range_initialvalue: 0.2 #default
   clip_range_endvalue: 0.0
+  clip_range_moving_window: False
 
 # Tuned
 HalfCheetahBulletEnv-v0:
@@ -173,6 +182,7 @@ HalfCheetahBulletEnv-v0:
                        activation_fn=nn.ReLU,
                        net_arch=[dict(pi=[256, 256], vf=[256, 256])]
                        )"
+  clip_range_moving_window: False
 
 
 HalfCheetah-v3:
@@ -195,6 +205,7 @@ HalfCheetah-v3:
   clip_range_function: 'const'
   clip_range_initialvalue: 0.4
   clip_range_endvalue: 0.0
+  clip_range_moving_window: False
 
 # Tuned
 AntBulletEnv-v0:
@@ -222,6 +233,7 @@ AntBulletEnv-v0:
                        activation_fn=nn.ReLU,
                        net_arch=[dict(pi=[256, 256], vf=[256, 256])]
                        )"
+  clip_range_moving_window: False
 
 # Tuned
 Walker2DBulletEnv-v0:
@@ -249,6 +261,7 @@ Walker2DBulletEnv-v0:
                        activation_fn=nn.ReLU,
                        net_arch=[dict(pi=[256, 256], vf=[256, 256])]
                        )"
+  clip_range_moving_window: False
 
 # Tuned
 HopperBulletEnv-v0:
@@ -276,6 +289,7 @@ HopperBulletEnv-v0:
                        activation_fn=nn.ReLU,
                        net_arch=[dict(pi=[256, 256], vf=[256, 256])]
                        )"
+  clip_range_moving_window: False
 
 # Tuned
 ReacherBulletEnv-v0:
@@ -303,6 +317,7 @@ ReacherBulletEnv-v0:
                        activation_fn=nn.ReLU,
                        net_arch=[dict(pi=[256, 256], vf=[256, 256])]
                        )"
+  clip_range_moving_window: False
 
 MinitaurBulletEnv-v0:
   normalize: true
@@ -319,6 +334,7 @@ MinitaurBulletEnv-v0:
   clip_range_function: 'const'
   clip_range_initialvalue: 0.4
   clip_range_endvalue: 0.0
+  clip_range_moving_window: False
 
 MinitaurBulletDuckEnv-v0:
   normalize: true
@@ -335,6 +351,7 @@ MinitaurBulletDuckEnv-v0:
   clip_range_function: 'const'
   clip_range_initialvalue: 0.2
   clip_range_endvalue: 0.0
+  clip_range_moving_window: False
 
 # To be tuned
 HumanoidBulletEnv-v0:
@@ -423,7 +440,7 @@ CarRacing-v0:
     - gym.wrappers.gray_scale_observation.GrayScaleObservation:
         keep_dim: true
   frame_stack: 4
-  n_envs: 8
+  n_envs: 1
   n_timesteps: !!float 1e6
   policy: 'CnnPolicy'
   batch_size: 128
@@ -443,3 +460,4 @@ CarRacing-v0:
   policy_kwargs: "dict(log_std_init=-2,
                        ortho_init=False,
                        )"
+  clip_range_moving_window: False
