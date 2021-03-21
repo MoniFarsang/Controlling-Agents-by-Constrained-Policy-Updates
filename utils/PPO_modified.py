@@ -88,7 +88,9 @@ class PPO(OnPolicyAlgorithm):
         seed: Optional[int] = None,
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
-        clip_range_moving_window: bool = False
+        clip_range_moving_window: bool = False,
+        clip_range_initialvalue: float = 0.1,
+        clip_range_endvalue: float = 0.2,
         
     ):
 
@@ -119,7 +121,9 @@ class PPO(OnPolicyAlgorithm):
         self.clip_range_vf = clip_range_vf
         self.target_kl = target_kl
         self.clip_range_moving_window = clip_range_moving_window
-        self.clip_range_array=collections.deque([0.4, 0.4, 0.4, 0.4, 0.4],5)
+        self.clip_range_initialvalue = clip_range_initialvalue
+        self.clip_range_endvalue = clip_range_endvalue
+        self.clip_range_array=collections.deque([clip_range_initialvalue, clip_range_initialvalue, clip_range_initialvalue, clip_range_initialvalue, clip_range_initialvalue],5)
 
         if _init_setup_model:
             self._setup_model()
@@ -144,7 +148,7 @@ class PPO(OnPolicyAlgorithm):
         # Compute current clip range
         if (self.clip_range_moving_window):
             # Use moving window
-            clip_range = max(np.mean(self.clip_range_array), 0.1)
+            clip_range = min(max(np.mean(self.clip_range_array), self.clip_range_endvalue), self.clip_range_initialvalue)
         else:
             clip_range = self.clip_range(self._current_progress_remaining)
 

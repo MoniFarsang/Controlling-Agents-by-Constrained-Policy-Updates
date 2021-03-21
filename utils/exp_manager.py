@@ -69,6 +69,8 @@ class ExperimentManager(object):
         pruner: str = "median",
         schedule: str = "const",
         clip_range_moving_window: bool = False,
+        clip_range_initialvalue: float = 0.1,
+        clip_range_endvalue: float = 0.2,
         n_startup_trials: int = 0,
         n_evaluations: int = 1,
         truncate_last_trajectory: bool = False,
@@ -176,7 +178,9 @@ class ExperimentManager(object):
                 tensorboard_log=self.tensorboard_log,
                 seed=self.seed,
                 verbose=self.verbose,
-                #clip_range_moving_window=self.clip_range_moving_window,
+                clip_range_moving_window=self.clip_range_moving_window,
+                clip_range_initialvalue=self.clip_range_initialvalue,
+                clip_range_endvalue=self.clip_range_endvalue,
                 **self._hyperparams,
             )
 
@@ -295,8 +299,8 @@ class ExperimentManager(object):
                 hyperparams["clip_range"]=zcurve_schedule_clip(float(hyperparams["clip_range_initialvalue"]),float(hyperparams["clip_range_endvalue"]))
             
             del hyperparams["clip_range_function"]
-            del hyperparams["clip_range_initialvalue"]
-            del hyperparams["clip_range_endvalue"]
+            #del hyperparams["clip_range_initialvalue"]
+            #del hyperparams["clip_range_endvalue"]
         return hyperparams
 
     def _preprocess_normalization(self, hyperparams: Dict[str, Any]) -> Dict[str, Any]:
@@ -381,6 +385,13 @@ class ExperimentManager(object):
         else:
             self.clip_range_moving_window = False
             
+        if "clip_range_initialvalue" in hyperparams.keys():
+            self.clip_range_initialvalue = hyperparams["clip_range_initialvalue"]
+            del hyperparams["clip_range_initialvalue"]
+
+        if "clip_range_endvalue" in hyperparams.keys():
+            self.clip_range_endvalue = hyperparams["clip_range_endvalue"]
+            del hyperparams["clip_range_endvalue"]
 
         return hyperparams, env_wrapper, callbacks
 
