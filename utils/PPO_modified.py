@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional, Type, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import torch as th
+import collections
 from gym import spaces
 from torch.nn import functional as F
 
@@ -87,6 +88,8 @@ class PPO(OnPolicyAlgorithm):
         seed: Optional[int] = None,
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
+        clip_range_moving_window: bool = False
+        
     ):
 
         super(PPO, self).__init__(
@@ -115,6 +118,8 @@ class PPO(OnPolicyAlgorithm):
         self.clip_range = clip_range
         self.clip_range_vf = clip_range_vf
         self.target_kl = target_kl
+        self.clip_range_moving_window = clip_range_moving_window
+        self.clip_range_array=collections.deque([0.4, 0.4, 0.4, 0.4, 0.4],5)
 
         if _init_setup_model:
             self._setup_model()
@@ -137,7 +142,12 @@ class PPO(OnPolicyAlgorithm):
         # Update optimizer learning rate
         self._update_learning_rate(self.policy.optimizer)
         # Compute current clip range
-        clip_range = self.clip_range(self._current_progress_remaining)
+        if (self.clip_range_moving_window):
+            # Use moving window
+            clip_range = max(np.mean(self.clip_range_array), 0.1)
+        else:
+            clip_range = self.clip_range(self._current_progress_remaining)
+
         # Optional: clip range for the value function
         if self.clip_range_vf is not None:
             clip_range_vf = self.clip_range_vf(self._current_progress_remaining)
@@ -193,6 +203,7 @@ class PPO(OnPolicyAlgorithm):
                 pg_losses.append(policy_loss.item())
                 clip_fraction = th.mean((th.abs(ratio - 1) > clip_range).float()).item()
                 clip_fractions.append(clip_fraction)
+                
 
                 if self.clip_range_vf is None:
                     # No clipping
@@ -234,6 +245,8 @@ class PPO(OnPolicyAlgorithm):
 
         self._n_updates += self.n_epochs
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())
+        if (self.clip_range_moving_window):
+            self.clip_range_array.append(np.mean(clip_fractions))
 
         # Logs
         logger.record("train/entropy_loss", np.mean(entropy_losses))
