@@ -207,7 +207,7 @@ class PPO(OnPolicyAlgorithm):
                 pg_losses.append(policy_loss.item())
                 clip_fraction = th.mean((th.abs(ratio - 1) > clip_range).float()).item()
                 clip_fractions.append(clip_fraction)
-                
+                ratios_without_clipping = th.mean(th.abs(ratio - 1)).item()
 
                 if self.clip_range_vf is None:
                     # No clipping
@@ -250,7 +250,8 @@ class PPO(OnPolicyAlgorithm):
         self._n_updates += self.n_epochs
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())
         if (self.clip_range_moving_window):
-            self.clip_range_array.append(np.mean(clip_fractions))
+            if (ratios_without_clipping>0):
+                self.clip_range_array.append(ratios_without_clipping)
 
         # Logs
         logger.record("train/entropy_loss", np.mean(entropy_losses))
