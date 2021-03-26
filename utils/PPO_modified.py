@@ -89,6 +89,7 @@ class PPO(OnPolicyAlgorithm):
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
         clip_range_moving_window: bool = False,
+        clip_range_diff: bool = False,
         clip_range_initialvalue: float = 0.1,
         clip_range_endvalue: float = 0.2,
         
@@ -121,9 +122,11 @@ class PPO(OnPolicyAlgorithm):
         self.clip_range_vf = clip_range_vf
         self.target_kl = target_kl
         self.clip_range_moving_window = clip_range_moving_window
+        self.clip_range_diff = clip_range_diff
         self.clip_range_initialvalue = clip_range_initialvalue
         self.clip_range_endvalue = clip_range_endvalue
         self.clip_range_array=collections.deque([clip_range_initialvalue, clip_range_initialvalue, clip_range_initialvalue, clip_range_initialvalue, clip_range_initialvalue],5)
+        self.previous_ratio = 1
 
         if _init_setup_model:
             self._setup_model()
@@ -145,11 +148,16 @@ class PPO(OnPolicyAlgorithm):
         """
         # Update optimizer learning rate
         self._update_learning_rate(self.policy.optimizer)
+
         # Compute current clip range
         if (self.clip_range_moving_window):
             # Use moving window
             clip_range = min(max(np.mean(self.clip_range_array), self.clip_range_endvalue), self.clip_range_initialvalue)
+        #elif (self.clip_range_diff):
+            # Use gradient step
+            #clip_range
         else:
+            # Default mode
             clip_range = self.clip_range(self._current_progress_remaining)
 
         # Optional: clip range for the value function
@@ -160,7 +168,7 @@ class PPO(OnPolicyAlgorithm):
         pg_losses, value_losses = [], []
         clip_fractions = []
 
-        # train for n_epochs epochs
+        # Train for n_epochs epochs
         for epoch in range(self.n_epochs):
             approx_kl_divs = []
             # Do a complete pass on the rollout buffer
@@ -171,23 +179,23 @@ class PPO(OnPolicyAlgorithm):
                     actions = rollout_data.actions.long().flatten()
 
                 # Re-sample the noise matrix because the log_std has changed
-                # TODO: investigate why there is no issue with the gradient
-                # if that line is commented (as in SAC)
                 if self.use_sde:
                     self.policy.reset_noise(self.batch_size)
 
+                # Evaluate actions with the current policy
                 values, log_prob, entropy = self.policy.evaluate_actions(rollout_data.observations, actions)
+                # Reshape values into a one-dimensional tensor
                 values = values.flatten()
-                # Normalize advantage
+                # Get advantages values from rollout sample
                 advantages = rollout_data.advantages
+                # Normalize advantage
                 advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
-                # ratio between old and new policy, should be one at the first iteration
+                # Calculate the ratio between old and new policy
                 ratio = th.exp(log_prob - rollout_data.old_log_prob)
 
-                # clipped surrogate loss
+                # Clipped surrogate loss
                 policy_loss_1 = advantages * ratio
-                
                 policy_loss_2 = advantages * th.clamp(ratio, 1 - clip_range, 1 + clip_range)
 
                 policy_loss_equal_elements = th.eq(policy_loss_1, policy_loss_2)
@@ -207,17 +215,18 @@ class PPO(OnPolicyAlgorithm):
                 pg_losses.append(policy_loss.item())
                 clip_fraction = th.mean((th.abs(ratio - 1) > clip_range).float()).item()
                 clip_fractions.append(clip_fraction)
-                ratios_without_clipping = th.mean(th.abs(ratio - 1)).item()
+                ratio_without_clipping = th.mean(th.abs(ratio - 1)).item()
 
+                # Clipping parameter for the value function (optinal)
                 if self.clip_range_vf is None:
                     # No clipping
                     values_pred = values
                 else:
-                    # Clip the different between old and new value
-                    # NOTE: this depends on the reward scaling
+                    # Clip the difference between old and new value if out of range
                     values_pred = rollout_data.old_values + th.clamp(
                         values - rollout_data.old_values, -clip_range_vf, clip_range_vf
                     )
+
                 # Value loss using the TD(gae_lambda) target
                 value_loss = F.mse_loss(rollout_data.returns, values_pred)
                 value_losses.append(value_loss.item())
@@ -228,30 +237,41 @@ class PPO(OnPolicyAlgorithm):
                     entropy_loss = -th.mean(-log_prob)
                 else:
                     entropy_loss = -th.mean(entropy)
-
+                # Append current entropy to the list
                 entropy_losses.append(entropy_loss.item())
 
+                # Calculate loss from policy loss, entropy and value loss
                 loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
 
                 # Optimization step
                 self.policy.optimizer.zero_grad()
+                # Propagate backwards, calculate the gradients
                 loss.backward()
-                # Clip grad norm
+                # Limit gradient norm to avoid exploding gradients and modify the values in-place
                 th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
+                # Make the optimization step with the updated gradients to update the parameters
                 self.policy.optimizer.step()
                 approx_kl_divs.append(th.mean(rollout_data.old_log_prob - log_prob).detach().cpu().numpy())
 
+            # Append current KL divergence to the list
             all_kl_divs.append(np.mean(approx_kl_divs))
 
+            # Check for early stopping with high KL divergence
             if self.target_kl is not None and np.mean(approx_kl_divs) > 1.5 * self.target_kl:
                 print(f"Early stopping at step {epoch} due to reaching max kl: {np.mean(approx_kl_divs):.2f}")
                 break
-
+        
+        # Sum epoch number
         self._n_updates += self.n_epochs
+        # Calculate explained variance from predicted and true values
+        # Goal is to be close to 1
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())
         if (self.clip_range_moving_window):
-            if (ratios_without_clipping>0):
-                self.clip_range_array.append(ratios_without_clipping)
+            # Add ratio to moving window
+            if (ratio_without_clipping>0):
+                self.clip_range_array.append(ratio_without_clipping)
+        # Store previous ratio without clipping
+        self.previous_ratio = ratio_without_clipping
 
         # Logs
         logger.record("train/entropy_loss", np.mean(entropy_losses))
