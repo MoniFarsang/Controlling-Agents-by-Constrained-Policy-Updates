@@ -217,9 +217,9 @@ class PPO(OnPolicyAlgorithm):
                 clip_fractions.append(clip_fraction)
                 ratio_without_clipping = th.mean(th.abs(ratio - 1)).item()
 
-                # Clipping parameter for the value function (optinal)
+                # Check the clipping parameter for the value function (optional)
                 if self.clip_range_vf is None:
-                    # No clipping
+                    # Do no clipping
                     values_pred = values
                 else:
                     # Clip the difference between old and new value if out of range
@@ -227,23 +227,27 @@ class PPO(OnPolicyAlgorithm):
                         values - rollout_data.old_values, -clip_range_vf, clip_range_vf
                     )
 
-                # Value loss using the TD(gae_lambda) target
+                # Value loss
+                # Element-wise mean squared error between the returns and the predicted values
                 value_loss = F.mse_loss(rollout_data.returns, values_pred)
+                # Append current value loss to the value losses list
                 value_losses.append(value_loss.item())
 
-                # Entropy loss favor exploration
+                # Entropy loss
                 if entropy is None:
-                    # Approximate entropy when no analytical form
+                    # Approximate entropy when there is no analytical form
                     entropy_loss = -th.mean(-log_prob)
                 else:
+                    # Use entropy from the evaluated actions
                     entropy_loss = -th.mean(entropy)
-                # Append current entropy to the list
+                # Append current entropy to the entropy losses list
                 entropy_losses.append(entropy_loss.item())
 
                 # Calculate loss from policy loss, entropy and value loss
                 loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
 
-                # Optimization step
+                # Optimization
+                # Clear old gradients
                 self.policy.optimizer.zero_grad()
                 # Propagate backwards, calculate the gradients
                 loss.backward()
