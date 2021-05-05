@@ -153,11 +153,8 @@ class PPO(OnPolicyAlgorithm):
         if (self.clip_range_moving_window):
             # Use moving window
             clip_range = min(max(np.mean(self.clip_range_array), self.clip_range_endvalue), self.clip_range_initialvalue)
-        #elif (self.clip_range_diff):
-            # Use gradient step
-            #clip_range
         else:
-            # Default mode
+            # Mode for constant, linear, exponential and z-shaped decay
             clip_range = self.clip_range(self._current_progress_remaining)
 
         # Optional: clip range for the value function
@@ -165,8 +162,9 @@ class PPO(OnPolicyAlgorithm):
             clip_range_vf = self.clip_range_vf(self._current_progress_remaining)
 
         entropy_losses, all_kl_divs = [], []
-        pg_losses, value_losses = [], []
+        policy_losses, value_losses = [], []
         clip_fractions = []
+        clip_mins, clip_maxs = [], []
 
         # Train for n_epochs epochs
         for epoch in range(self.n_epochs):
@@ -212,9 +210,13 @@ class PPO(OnPolicyAlgorithm):
                 #plt.hlines(policy_loss_min_mean, 0, self.batch_size-1)
                 #plt.show()
                 # Logging
-                pg_losses.append(policy_loss.item())
+                policy_losses.append(policy_loss.item())
                 clip_fraction = th.mean((th.abs(ratio - 1) > clip_range).float()).item()
                 clip_fractions.append(clip_fraction)
+                clip_min = th.max(ratio).item()
+                clip_mins.append(clip_min)
+                clip_max = th.max(ratio).item()
+                clip_mins.append(clip_max)
                 ratio_without_clipping = th.mean(th.abs(ratio - 1)).item()
 
                 # Check the clipping parameter for the value function (optional)
@@ -270,26 +272,36 @@ class PPO(OnPolicyAlgorithm):
         # Calculate explained variance from predicted and true values
         # Goal is to be close to 1
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())
+        # In the case of using moving average strategy
         if (self.clip_range_moving_window):
             # Add ratio to moving window
             if (ratio_without_clipping>0):
                 self.clip_range_array.append(ratio_without_clipping)
+
+
         # Store previous ratio without clipping
         self.previous_ratio = ratio_without_clipping
 
         # Logs
+        # Losses
+        logger.record("train/policy_gradient_loss", np.mean(policy_losses))
         logger.record("train/entropy_loss", np.mean(entropy_losses))
-        logger.record("train/policy_gradient_loss", np.mean(pg_losses))
         logger.record("train/value_loss", np.mean(value_losses))
-        logger.record("train/approx_kl", np.mean(approx_kl_divs))
-        logger.record("train/clip_fraction", np.mean(clip_fractions))
         logger.record("train/loss", loss.item())
+
+        logger.record("train/approx_kl", np.mean(approx_kl_divs))
         logger.record("train/explained_variance", explained_var)
         if hasattr(self.policy, "log_std"):
             logger.record("train/std", th.exp(self.policy.log_std).mean().item())
 
         logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
+
+        # Clipping
         logger.record("train/clip_range", clip_range)
+        logger.record("train/ratio_without_clip", np.mean(ratio_without_clipping))
+        logger.record("train/clip_fraction", np.mean(clip_fractions))
+        
+
         if self.clip_range_vf is not None:
             logger.record("train/clip_range_vf", clip_range_vf)
 
