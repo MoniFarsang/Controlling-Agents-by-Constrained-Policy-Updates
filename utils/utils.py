@@ -279,6 +279,8 @@ def exponential_schedule_clip(initial_value, end_value):
     """
     if isinstance(initial_value, str):
         initial_value = float(initial_value)
+    if isinstance(end_value, str):
+        end_value = float(end_value)
 
     def func(progress):
         """
@@ -300,6 +302,8 @@ def linear_schedule_clip(initial_value, end_value):
     """
     if isinstance(initial_value, str):
         initial_value = float(initial_value)
+    if isinstance(end_value, str):
+        end_value = float(end_value)
 
     def func(progress):
         """
@@ -313,13 +317,15 @@ def linear_schedule_clip(initial_value, end_value):
 
 def zcurve_schedule_clip(initial_value, end_value):
     """
-    Linear cliprange schedule.
+    Z-shaped cliprange schedule.
     :param initial_value: (float)
     :param end_value: (float)
     :return: (function)
     """
     if isinstance(initial_value, str):
         initial_value = float(initial_value)
+    if isinstance(end_value, str):
+        end_value = float(end_value)
 
     def func(progress):
         """
