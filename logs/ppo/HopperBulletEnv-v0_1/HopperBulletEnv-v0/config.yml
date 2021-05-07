@@ -1,6 +1,6 @@
 !!python/object/apply:collections.OrderedDict
 - - [batch_size, 128]
-  - [clip_range_endvalue, 0.0]
+  - [clip_range_endvalue, 0.1]
   - [clip_range_function, lin]
   - [clip_range_initialvalue, 0.4]
   - [ent_coef, 0.0]
@@ -12,7 +12,7 @@
   - [n_envs, 16]
   - [n_epochs, 20]
   - [n_steps, 512]
-  - [n_timesteps, 2000000.0]
+  - [n_timesteps, 1000000.0]
   - [normalize, true]
   - [policy, MlpPolicy]
   - [policy_kwargs, 'dict(log_std_init=-2, ortho_init=False, activation_fn=nn.ReLU,

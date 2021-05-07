@@ -7,8 +7,8 @@
   - - gym_packages
     - []
   - - hyperparams
-    - {clip_range_initialvalue: 0.4, n_timesteps: 2000000.0}
-  - [log_folder, HopperBulletEnv/constfrom_0.3_to_0.0]
+    - {clip_range_endvalue: 0.1, n_timesteps: 1000000.0}
+  - [log_folder, HopperBulletEnv_seed_0/constconst_0.4]
   - [log_interval, -1]
   - [n_evaluations, 20]
   - [n_jobs, 1]
@@ -22,10 +22,10 @@
   - [save_freq, -1]
   - [save_replay_buffer, false]
   - [schedule, const]
-  - [seed, 1]
+  - [seed, 0]
   - [storage, null]
   - [study_name, null]
-  - [tensorboard_log, HopperBulletEnv/constfrom_0.3_to_0.0]
+  - [tensorboard_log, HopperBulletEnv_seed_0/constconst_0.4]
   - [trained_agent, '']
   - [truncate_last_trajectory, true]
   - [uuid, false]
