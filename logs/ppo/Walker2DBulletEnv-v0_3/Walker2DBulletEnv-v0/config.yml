@@ -1,8 +1,9 @@
 !!python/object/apply:collections.OrderedDict
 - - [batch_size, 128]
-  - [clip_range_endvalue, 0.0]
+  - [clip_range_endvalue, 0.1]
   - [clip_range_function, lin]
   - [clip_range_initialvalue, 0.4]
+  - [clip_range_moving_window, false]
   - [ent_coef, 0.0]
   - [env_wrapper, utils.wrappers.TimeFeatureWrapper]
   - [gae_lambda, 0.92]

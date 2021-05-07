@@ -7,8 +7,9 @@
   - - gym_packages
     - []
   - - hyperparams
-    - {clip_range_initialvalue: 0.4, n_timesteps: 2000000.0}
-  - [log_folder, Walker2DBulletEnv/exponfrom_0.4_to_0.0]
+    - {clip_range_endvalue: 0.1, clip_range_initialvalue: 0.4, clip_range_moving_window: false,
+      n_timesteps: 2000000.0}
+  - [log_folder, Walker2D_seed30const/exp0.4]
   - [log_interval, -1]
   - [n_evaluations, 20]
   - [n_jobs, 1]
@@ -22,10 +23,10 @@
   - [save_freq, -1]
   - [save_replay_buffer, false]
   - [schedule, exp]
-  - [seed, 42]
+  - [seed, 30]
   - [storage, null]
   - [study_name, null]
-  - [tensorboard_log, Walker2DBulletEnv/exponfrom_0.4_to_0.0]
+  - [tensorboard_log, Walker2D_seed30const/exp0.4]
   - [trained_agent, '']
   - [truncate_last_trajectory, true]
   - [uuid, false]
