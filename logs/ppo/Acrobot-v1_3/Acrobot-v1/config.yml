@@ -8,6 +8,6 @@
   - [n_envs, 16]
   - [n_epochs, 4]
   - [n_steps, 256]
-  - [n_timesteps, 1000000.0]
+  - [n_timesteps, 200000.0]
   - [normalize, true]
   - [policy, MlpPolicy]
