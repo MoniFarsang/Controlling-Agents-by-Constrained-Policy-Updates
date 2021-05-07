@@ -6,8 +6,9 @@
   - [eval_freq, 10000]
   - - gym_packages
     - []
-  - [hyperparams, null]
-  - [log_folder, CartPole2/constfrom_0.2_to_0.0]
+  - - hyperparams
+    - {clip_range_endvalue: 0.1}
+  - [log_folder, CartPole_seed0/constconst_0.2]
   - [log_interval, -1]
   - [n_evaluations, 20]
   - [n_jobs, 1]
@@ -21,10 +22,10 @@
   - [save_freq, -1]
   - [save_replay_buffer, false]
   - [schedule, const]
-  - [seed, 10]
+  - [seed, 0]
   - [storage, null]
   - [study_name, null]
-  - [tensorboard_log, CartPole2/constfrom_0.2_to_0.0]
+  - [tensorboard_log, CartPole_seed0/constconst_0.2]
   - [trained_agent, '']
   - [truncate_last_trajectory, true]
   - [uuid, false]

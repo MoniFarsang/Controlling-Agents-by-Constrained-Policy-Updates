@@ -6,9 +6,8 @@
   - [eval_freq, 10000]
   - - gym_packages
     - []
-  - - hyperparams
-    - {clip_range_initialvalue: 0.2}
-  - [log_folder, CartPole/linfrom_0.2_to_0.0]
+  - [hyperparams, null]
+  - [log_folder, CartPole_seed0/linfrom_0.2_to_0.0]
   - [log_interval, -1]
   - [n_evaluations, 20]
   - [n_jobs, 1]
@@ -25,7 +24,7 @@
   - [seed, 0]
   - [storage, null]
   - [study_name, null]
-  - [tensorboard_log, CartPole/linfrom_0.2_to_0.0]
+  - [tensorboard_log, CartPole_seed0/linfrom_0.2_to_0.0]
   - [trained_agent, '']
   - [truncate_last_trajectory, true]
   - [uuid, false]
