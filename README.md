@@ -1,15 +1,20 @@
-# Decaying Clipping Range in Proximal Policy Optimization
+# Deep Reinforcement Learning in Robotics
 
-This repository based on the fork from [Stable Baselines3](https://github.com/DLR-RM/stable-baselines3).
+This repository is based on my project [Decaying Clipping Range in Proximal Policy Optimization](https://github.com/MoniFarsang/ppo-clipping-approaches), which is the fork from [Stable Baselines3](https://github.com/DLR-RM/stable-baselines3). 
 
-This code was used for the PPO analysis of the linearly and exponentially decaying clipping ranges.
+This code can be used for the Proximal Policy Optimization (PPO) algorithm analysis of the linearly, exponentially and Z-shaped decaying clipping and applying moving average clipping ranges.
 
-The following environments were examined:
+The following environments are examined:
 
 OpenAI Gym:
-- CartPole
-- Pendulum
-- Acrobot
+- Classical control:
+  - CartPole
+  - Pendulum
+  - Acrobot
+- Box2D:
+  - Lunar Lander
+  - Bipedal Walker
+  - Car Racing
 
 PyBullet:
 - Hopper
@@ -19,7 +24,7 @@ PyBullet:
 
 ## Enjoy the trained  PPO agent
 
-The trained agents are added to the repo. The exp-id refers to the different clipping strategies (1: constant, 2: linearly decaying, 3: exponentially decaying). If the trained agent exists, then you can see it in action using:
+The trained agents are added to the repo. The exp-id refers to the different clipping strategies (1: constant, 2: linearly decaying, 3: exponentially decaying, 4: Z-shaped decaying, 5: using moving average). If the trained agent exists, then you can see it in action using:
 ```
 python enjoy.py --algo ppo --env env_id --exp-id number
 ```
